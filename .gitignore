@@ -1,0 +1,4 @@
+﻿/target
+/dist
+/selftest_out
+*.pdb

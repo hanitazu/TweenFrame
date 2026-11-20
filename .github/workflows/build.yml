@@ -1,0 +1,43 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Unit tests
+        run: cargo test --release --lib
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Package
+        shell: pwsh
+        run: Copy-Item target/release/tweenframe.exe TweenFrame.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TweenFrame
+          path: TweenFrame.exe
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: TweenFrame.exe
+          generate_release_notes: true
